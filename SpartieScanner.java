@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 public class SpartieScanner {
+    //TODO: Minimize hardcoded strings
+
     private String source;
 
     private int start = 0;
@@ -37,6 +39,7 @@ public class SpartieScanner {
             if (token.type != TokenType.IGNORE) tokens.add(token);
         }
 
+        tokens.add(new Token(TokenType.EOF, "", line));
         return tokens;
     }
 
@@ -57,24 +60,28 @@ public class SpartieScanner {
         return token;
     }
 
-    // TODO: Complete implementation
     private Token getSingleCharacterToken() {
         /* Single character tokens should include:
-           Simple tokens
-            SEMICOLON,
-            COMMA,
-            ASSIGN, // =
-            LEFT_BRACE, RIGHT_BRACE, // { }
-            LEFT_PAREN, RIGHT_PAREN, // ( )
-            MULTIPLY, //  *
-            ADD, SUBTRACT, // + -
-            NOT, // !
-           Logical
-            AND, OR, // & |
+            Simple tokens
+                SEMICOLON   ';'
+                COMMA       ','
+                LEFT_BRACE  '{'
+                RIGHT_BRACE '}'
+                LEFT_PAREN  '('
+                RIGHT_PAREN ')'
+                MULTIPLY    '*'
+                ADD         '+'
+                SUBTRACT    '-'
+            Logical
+                AND         '&'
+                OR          '|'
+            Ignore
+                IGNORE      ' '
+            Markers
+                EOL         \n
          */
 
         // Hint: Examine the character, if you can get a token, return it, otherwise return null
-        // Hint: Be careful with the divide, we have ot know if it is a single character
         // Hint: Start of not knowing what the token is, if we can determine it, return it, otherwise, return null
         TokenType type = TokenType.UNDEFINED;
         char nextCharacter = source.charAt(current);
@@ -84,9 +91,6 @@ public class SpartieScanner {
                 break;
             case ',':
                 type = TokenType.COMMA;
-                break;
-            case '=':
-                type = TokenType.ASSIGN;
                 break;
             case '{':
                 type = TokenType.LEFT_BRACE;
@@ -109,35 +113,104 @@ public class SpartieScanner {
             case '-':
                 type = TokenType.SUBTRACT;
                 break;
-            case '!':
-                type = TokenType.NOT;
-                break;
             case '&':
                 type = TokenType.AND;
                 break;
             case '|':
                 type = TokenType.OR;
                 break;
+            case ' ':
+                type = TokenType.IGNORE;
+                break;
+            case '\n':
+                type =TokenType.EOL;
+                line++;
+                break;
         }
 
-        if (type != TokenType.UNDEFINED) return new Token(type, String.valueOf(nextCharacter), line);
+        if (type != TokenType.UNDEFINED) {
+            current++;
+            return new Token(type, String.valueOf(nextCharacter), line);
+        }
+
         return null;
     }
 
-    // TODO: Complete implementation
     private Token getComparisonToken() {
         // Hint: Examine the character for a comparison but check the next character (as long as one is available)
         // For example: < or <=
+        /* Comparison Tokens should include:
+            Comparison
+                EQUIVALENT      ==
+                NOT_EQUAL       !=
+                LESS_THAN       <
+                LESS_EQUAL      <=
+                GREATER_THAN    >
+                GREATER_EQUAL   >=
+            Simple tokens
+                ASSIGN          =
+                NOT             !
+         */
         char nextCharacter = source.charAt(current);
+        switch (nextCharacter) {
+            case '=':
+                if (examine('=')) { // If it's '=='
+                    current += 2;
+                    return new Token(TokenType.EQUIVALENT, "==", line);
+                }
+                // If it's '='
+                current++;
+                return new Token(TokenType.ASSIGN, String.valueOf(nextCharacter), line);
+            case '!':
+                if (examine('=')) { // if it's '!='
+                    current += 2;
+                    return new Token(TokenType.NOT_EQUAL, "!=", line);
+                }
+                // If it's '!'
+                current++;
+                return new Token(TokenType.NOT, "!", line);
+            case '<':
+                if (examine('=')) { // If it's '<='
+                    current += 2;
+                    return new Token(TokenType.LESS_EQUAL, "<=", line);
+                }
+                // If it's '<'
+                current++;
+                return new Token(TokenType.LESS_THAN, "<", line);
+            case '>':
+                if (examine('=')) { // If it's '>='
+                    current += 2;
+                    return new Token(TokenType.GREATER_EQUAL, ">=", line);
+                }
+                // If it's '>'
+                current++;
+                return new Token(TokenType.GREATER_THAN, ">", line);
 
+        }
         return null;
     }
 
-    // TODO: Complete implementation
     private Token getDivideOrComment() {
-        // Hint: Examine the character for a comparison but check the next character (as long as one is available)
+        /* Divide or Comment should include:
+            Simple Tokens
+                DIVIDE  /
+            Ignore
+                IGNORE
+         */
         char nextCharacter = source.charAt(current);
-
+        if (nextCharacter == '/') {
+            if (examine('/')) { // If it's '//'
+                current += 2;
+                while (source.charAt(current) != '\n') { // Go to the end of the line
+                    current++;
+                }
+                current++;
+                return new Token(TokenType.IGNORE, "", line);
+            }
+            // If it's '/'
+            current++;
+            return new Token(TokenType.DIVIDE, "/", line);
+        }
         return null;
     }
 
@@ -145,9 +218,27 @@ public class SpartieScanner {
     private Token getStringToken() {
         // Hint: Check if you have a double quote, then keep reading until you hit another double quote
         // But, if you do not hit another double quote, you should report an error
+        /* String Token should include:
+            Value Types:
+                STRING  ""
+         */
         char nextCharacter = source.charAt(current);
+        if (nextCharacter == '"') {
+            int start = current;
+            current++;
+            while (true) {
+                if (isAtEnd()) error(line, String.format("Unterminated String %s at %d", source.substring(start, current), start));
+                nextCharacter = source.charAt(current);
+                if (nextCharacter == '\n') error(line, String.format("Unterminated String %s at %d", source.substring(start, current), start));
+                if (nextCharacter == '"') {
+                    int end = current;
+                    current++;
+                    return new Token(TokenType.STRING, source.substring(start, end), line);
+                }
+                current++;
+            }
 
-        String string = null;
+        }
 
         return null;
     }
