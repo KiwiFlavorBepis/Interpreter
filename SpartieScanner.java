@@ -127,10 +127,6 @@ public class SpartieScanner {
                 type = TokenType.EOL;
                 line++;
                 break;
-            case '\r':
-                type = TokenType.EOL;
-                line++;
-                break;
         }
 
         if (type != TokenType.UNDEFINED) {
