@@ -123,8 +123,9 @@ public class SpartieScanner {
                 break;
             case '\n':
                 type = TokenType.EOL;
+                current++;
                 line++;
-                break;
+                return new Token(type, "\\n", line - 1);
         }
 
         if (type != TokenType.UNDEFINED) {
@@ -274,10 +275,8 @@ public class SpartieScanner {
             int start = current;
             do {
                 current++;
-                currentCharacter = source.charAt(current);
-            } while (isAlpha(currentCharacter));
+            } while (!isAtEnd() && isAlpha(source.charAt(current)));
             String word = source.substring(start, current);
-            current++;
             return switch (word) {
                 case "var" -> new Token(TokenType.VAR, word, line);
                 case "for" -> new Token(TokenType.FOR, word, line);
