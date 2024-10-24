@@ -124,14 +124,14 @@ public class SpartieScanner {
                 type = TokenType.IGNORE;
                 break;
             case '\r':
-                type =TokenType.EOL;
+                type = TokenType.EOL;
                 line++;
                 break;
         }
 
         if (type != TokenType.UNDEFINED) {
             current++;
-            return new Token(type, String.valueOf(currentCharacter), line);
+            return new Token(type, String.valueOf(currentCharacter).replace("\n","\\n"), line);
         }
 
         return null;
