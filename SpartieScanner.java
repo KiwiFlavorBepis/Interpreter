@@ -137,8 +137,6 @@ public class SpartieScanner {
     }
 
     private Token getComparisonToken() {
-        // Hint: Examine the character for a comparison but check the next character (as long as one is available)
-        // For example: < or <=
         /* Comparison Tokens should include:
             Comparison
                 EQUIVALENT      ==
@@ -214,13 +212,10 @@ public class SpartieScanner {
         return null;
     }
 
-    // TODO: Complete implementation
     private Token getStringToken() {
-        // Hint: Check if you have a double quote, then keep reading until you hit another double quote
-        // But, if you do not hit another double quote, you should report an error
         /* String Token should include:
             Value Types:
-                STRING  ""
+                STRING  "*"
          */
         char currentCharacter = source.charAt(current);
         if (currentCharacter == '"') {
@@ -242,8 +237,10 @@ public class SpartieScanner {
     }
 
     private Token getNumericToken() {
-        // Hint: Follow similar idea of String, but in this case if it is a digit
-        // You should only allow one period in your scanner
+        /* Numeric Tokens should include:
+            Value Types:
+                NUMBER  NUMBER | NUMBER . NUMBER
+         */
         char currentCharacter = source.charAt(current);
         if (isDigit(currentCharacter)) {
             int start = current;
@@ -268,11 +265,33 @@ public class SpartieScanner {
         return null;
     }
 
-    // TODO: Complete implementation
     private Token getIdentifierOrReservedWord() {
-        // Hint: Assume first it is an identifier and once you capture it, then check if it is a reserved word.
-        return null;
+        char currentCharacter = source.charAt(current);
+        if (isAlpha(currentCharacter)) {
+            int start = current;
+            do {
+                current++;
+                currentCharacter = source.charAt(current);
+            } while (isAlpha(currentCharacter));
+            String word = source.substring(start, current);
+            current++;
+            return switch (word) {
+                case "var" ->       new Token(TokenType.VAR, word, line);
+                case "for" ->       new Token(TokenType.FOR, word, line);
+                case "while" ->     new Token(TokenType.WHILE, word, line);
+                case "if" ->        new Token(TokenType.IF, word, line);
+                case "else" ->      new Token(TokenType.ELSE, word, line);
+                case "fun" ->       new Token(TokenType.FUN, word, line);
+                case "return" ->    new Token(TokenType.RETURN, word, line);
+                case "true" ->      new Token(TokenType.TRUE, word, line);
+                case "false" ->     new Token(TokenType.FALSE, word, line);
+                case "print" ->     new Token(TokenType.PRINT, word, line);
+                default ->          new Token(TokenType.IDENTIFIER, word, line);
+            };
+        }
+        return null; // Hint: Assume first it is an identifier and once you capture it, then check if it is a reserved word.
     }
+
     
     // Helper Methods
     private boolean isDigit(char character) {
