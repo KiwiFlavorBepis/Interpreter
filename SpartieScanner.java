@@ -220,8 +220,8 @@ public class SpartieScanner {
          */
         char currentCharacter = source.charAt(current);
         if (currentCharacter == '"') {
-            int start = current;
             current++;
+            int start = current;
             while (true) {
                 if (isAtEnd()) error(line, String.format("Unterminated String %s at %d", source.substring(start, current), start));
                 currentCharacter = source.charAt(current);
