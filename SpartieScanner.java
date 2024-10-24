@@ -36,6 +36,7 @@ public class SpartieScanner {
 
         Token token = null;
         while (!isAtEnd() && (token = getNextToken()) != null) {
+            System.out.println(token);
             if (token.type != TokenType.IGNORE) tokens.add(token);
         }
 
@@ -54,7 +55,7 @@ public class SpartieScanner {
         if (token == null) token = getNumericToken();
         if (token == null) token = getIdentifierOrReservedWord();
         if (token == null) {
-            error(line, String.format("Unexpected character '%c' at %d", source.charAt(current), current));
+            error(line, String.format("Unexpected character '%s' at %d bruh", String.valueOf(source.charAt(current)), current));
         }
 
         return token;
@@ -119,10 +120,10 @@ public class SpartieScanner {
             case '|':
                 type = TokenType.OR;
                 break;
-            case ' ':
+            case ' ', '\n':
                 type = TokenType.IGNORE;
                 break;
-            case '\n':
+            case '\r':
                 type =TokenType.EOL;
                 line++;
                 break;
