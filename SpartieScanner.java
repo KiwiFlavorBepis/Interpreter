@@ -12,7 +12,8 @@ public class SpartieScanner {
     private int current = 0;
     private int line = 1;
 
-    private static final Map<String, TokenType> keywords = new HashMap<>();
+    private static final Map<String, TokenType> keywords = new HashMap<>(); //Unused in implementation
+
     static {
         keywords.put("if", TokenType.IF);
         keywords.put("else", TokenType.ELSE);
@@ -36,7 +37,7 @@ public class SpartieScanner {
 
         Token token = null;
         while (!isAtEnd() && (token = getNextToken()) != null) {
-            System.out.println(token);
+            //System.out.println(token);
             if (token.type != TokenType.IGNORE) tokens.add(token);
         }
 
@@ -81,9 +82,6 @@ public class SpartieScanner {
             Markers
                 EOL         \n
          */
-
-        // Hint: Examine the character, if you can get a token, return it, otherwise return null
-        // Hint: Start of not knowing what the token is, if we can determine it, return it, otherwise, return null
         TokenType type = TokenType.UNDEFINED;
         char currentCharacter = source.charAt(current);
         switch (currentCharacter) {
@@ -131,7 +129,7 @@ public class SpartieScanner {
 
         if (type != TokenType.UNDEFINED) {
             current++;
-            return new Token(type, String.valueOf(currentCharacter).replace("\n","\\n"), line);
+            return new Token(type, String.valueOf(currentCharacter).replace("\n", "\\n"), line);
         }
 
         return null;
@@ -223,9 +221,11 @@ public class SpartieScanner {
             current++;
             int start = current;
             while (true) {
-                if (isAtEnd()) error(line, String.format("Unterminated String %s at %d", source.substring(start, current), start));
+                if (isAtEnd())
+                    error(line, String.format("Unterminated String %s at %d", source.substring(start, current), start));
                 currentCharacter = source.charAt(current);
-                if (currentCharacter == '\n') error(line, String.format("Unterminated String %s at %d", source.substring(start, current), start));
+                if (currentCharacter == '\n')
+                    error(line, String.format("Unterminated String %s at %d", source.substring(start, current), start));
                 if (currentCharacter == '"') {
                     int end = current;
                     current++;
@@ -248,10 +248,12 @@ public class SpartieScanner {
             boolean decimalPoint = false;
             while (isDigit(currentCharacter)) {
                 if (examine('.')) {
-                    if (decimalPoint) error(line, String.format("Unterminated number %s at %d", source.substring(start, current), current));
+                    if (decimalPoint)
+                        error(line, String.format("Unterminated number %s at %d", source.substring(start, current), current));
                     decimalPoint = true;
                     current += 2;
-                    if (isAtEnd() || !isDigit(source.charAt(current))) error(line, String.format("Unterminated number %s at %d", source.substring(start, current), current));
+                    if (isAtEnd() || !isDigit(source.charAt(current)))
+                        error(line, String.format("Unterminated number %s at %d", source.substring(start, current), current));
                     currentCharacter = source.charAt(current);
                 } else if (!isDigit(source.charAt(current + 1))) {
                     current++;
@@ -277,23 +279,23 @@ public class SpartieScanner {
             String word = source.substring(start, current);
             current++;
             return switch (word) {
-                case "var" ->       new Token(TokenType.VAR, word, line);
-                case "for" ->       new Token(TokenType.FOR, word, line);
-                case "while" ->     new Token(TokenType.WHILE, word, line);
-                case "if" ->        new Token(TokenType.IF, word, line);
-                case "else" ->      new Token(TokenType.ELSE, word, line);
-                case "fun" ->       new Token(TokenType.FUN, word, line);
-                case "return" ->    new Token(TokenType.RETURN, word, line);
-                case "true" ->      new Token(TokenType.TRUE, word, line);
-                case "false" ->     new Token(TokenType.FALSE, word, line);
-                case "print" ->     new Token(TokenType.PRINT, word, line);
-                default ->          new Token(TokenType.IDENTIFIER, word, line);
+                case "var" -> new Token(TokenType.VAR, word, line);
+                case "for" -> new Token(TokenType.FOR, word, line);
+                case "while" -> new Token(TokenType.WHILE, word, line);
+                case "if" -> new Token(TokenType.IF, word, line);
+                case "else" -> new Token(TokenType.ELSE, word, line);
+                case "fun" -> new Token(TokenType.FUN, word, line);
+                case "return" -> new Token(TokenType.RETURN, word, line);
+                case "true" -> new Token(TokenType.TRUE, word, line);
+                case "false" -> new Token(TokenType.FALSE, word, line);
+                case "print" -> new Token(TokenType.PRINT, word, line);
+                default -> new Token(TokenType.IDENTIFIER, word, line);
             };
         }
         return null; // Hint: Assume first it is an identifier and once you capture it, then check if it is a reserved word.
     }
 
-    
+
     // Helper Methods
     private boolean isDigit(char character) {
         return character >= '0' && character <= '9';
