@@ -84,8 +84,8 @@ public class SpartieScanner {
         // Hint: Examine the character, if you can get a token, return it, otherwise return null
         // Hint: Start of not knowing what the token is, if we can determine it, return it, otherwise, return null
         TokenType type = TokenType.UNDEFINED;
-        char nextCharacter = source.charAt(current);
-        switch (nextCharacter) {
+        char currentCharacter = source.charAt(current);
+        switch (currentCharacter) {
             case ';':
                 type = TokenType.SEMICOLON;
                 break;
@@ -130,7 +130,7 @@ public class SpartieScanner {
 
         if (type != TokenType.UNDEFINED) {
             current++;
-            return new Token(type, String.valueOf(nextCharacter), line);
+            return new Token(type, String.valueOf(currentCharacter), line);
         }
 
         return null;
@@ -151,8 +151,8 @@ public class SpartieScanner {
                 ASSIGN          =
                 NOT             !
          */
-        char nextCharacter = source.charAt(current);
-        switch (nextCharacter) {
+        char currentCharacter = source.charAt(current);
+        switch (currentCharacter) {
             case '=':
                 if (examine('=')) { // If it's '=='
                     current += 2;
@@ -160,7 +160,7 @@ public class SpartieScanner {
                 }
                 // If it's '='
                 current++;
-                return new Token(TokenType.ASSIGN, String.valueOf(nextCharacter), line);
+                return new Token(TokenType.ASSIGN, String.valueOf(currentCharacter), line);
             case '!':
                 if (examine('=')) { // if it's '!='
                     current += 2;
@@ -197,8 +197,8 @@ public class SpartieScanner {
             Ignore
                 IGNORE
          */
-        char nextCharacter = source.charAt(current);
-        if (nextCharacter == '/') {
+        char currentCharacter = source.charAt(current);
+        if (currentCharacter == '/') {
             if (examine('/')) { // If it's '//'
                 current += 2;
                 while (source.charAt(current) != '\n') { // Go to the end of the line
@@ -222,31 +222,49 @@ public class SpartieScanner {
             Value Types:
                 STRING  ""
          */
-        char nextCharacter = source.charAt(current);
-        if (nextCharacter == '"') {
+        char currentCharacter = source.charAt(current);
+        if (currentCharacter == '"') {
             int start = current;
             current++;
             while (true) {
                 if (isAtEnd()) error(line, String.format("Unterminated String %s at %d", source.substring(start, current), start));
-                nextCharacter = source.charAt(current);
-                if (nextCharacter == '\n') error(line, String.format("Unterminated String %s at %d", source.substring(start, current), start));
-                if (nextCharacter == '"') {
+                currentCharacter = source.charAt(current);
+                if (currentCharacter == '\n') error(line, String.format("Unterminated String %s at %d", source.substring(start, current), start));
+                if (currentCharacter == '"') {
                     int end = current;
                     current++;
                     return new Token(TokenType.STRING, source.substring(start, end), line);
                 }
                 current++;
             }
-
         }
-
         return null;
     }
 
-    // TODO: Complete implementation
     private Token getNumericToken() {
         // Hint: Follow similar idea of String, but in this case if it is a digit
         // You should only allow one period in your scanner
+        char currentCharacter = source.charAt(current);
+        if (isDigit(currentCharacter)) {
+            int start = current;
+            boolean decimalPoint = false;
+            while (isDigit(currentCharacter)) {
+                if (examine('.')) {
+                    if (decimalPoint) error(line, String.format("Unterminated number %s at %d", source.substring(start, current), current));
+                    decimalPoint = true;
+                    current += 2;
+                    if (isAtEnd() || !isDigit(source.charAt(current))) error(line, String.format("Unterminated number %s at %d", source.substring(start, current), current));
+                    currentCharacter = source.charAt(current);
+                } else if (examine(' ') || examine('\n')) {
+                    current++;
+                    return new Token(TokenType.NUMBER, source.substring(start, current), line);
+                } else {
+                    current++;
+                    currentCharacter = source.charAt(current);
+                }
+            }
+            error(line, String.format("Unexpected character %c at %d", currentCharacter, current));
+        }
         return null;
     }
 
