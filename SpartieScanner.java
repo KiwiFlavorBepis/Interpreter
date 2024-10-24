@@ -253,7 +253,7 @@ public class SpartieScanner {
                     current += 2;
                     if (isAtEnd() || !isDigit(source.charAt(current))) error(line, String.format("Unterminated number %s at %d", source.substring(start, current), current));
                     currentCharacter = source.charAt(current);
-                } else if (examine(' ') || examine('\n')) {
+                } else if (!isDigit(source.charAt(current + 1))) {
                     current++;
                     return new Token(TokenType.NUMBER, source.substring(start, current), line);
                 } else {
