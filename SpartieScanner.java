@@ -200,11 +200,11 @@ public class SpartieScanner {
         if (currentCharacter == '/') {
             if (examine('/')) { // If it's '//'
                 current += 2;
+                int start = current;
                 while (source.charAt(current) != '\n') { // Go to the end of the line
                     current++;
                 }
-                current++;
-                return new Token(TokenType.IGNORE, "", line);
+                return new Token(TokenType.IGNORE, source.substring(start, current), line);
             }
             // If it's '/'
             current++;
