@@ -120,8 +120,12 @@ public class SpartieScanner {
             case '|':
                 type = TokenType.OR;
                 break;
-            case ' ', '\n':
+            case ' ':
                 type = TokenType.IGNORE;
+                break;
+            case '\n':
+                type = TokenType.EOL;
+                line++;
                 break;
             case '\r':
                 type = TokenType.EOL;
